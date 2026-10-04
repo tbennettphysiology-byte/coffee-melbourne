@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Melbourne Coffee Ledger</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a single-column ledger in Melbourne black — blackletter masthead, bone type, tarnished brass for judged awards. Single dark theme by design. */
+:root{
+  --bg:#0b0a0a; --surface:#141212; --ink:#e7e1d6; --muted:#8f877c; --line:#2a2624;
+  --accent:#cfc6b6; --accent-soft:#1c1a19; --gold:#b8955a; --gold-soft:#221b12; --blood:#7a2a2a;
+  --gothic:"Grenze Gotisch","UnifrakturMaguntia",Georgia,serif;
+  --display:"Cormorant Garamond",Garamond,Georgia,serif; --body:"Instrument Sans",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body)}
+::selection{background:var(--blood);color:var(--ink)}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:40px 64px}
+header{border-bottom:3px double var(--line);padding-bottom:22px}
+header h1{font:500 clamp(2.6rem,9vw,4.4rem)/.95 var(--gothic);margin:0 0 14px;text-wrap:balance;letter-spacing:.01em}
+header h1 span{display:block;font:italic 500 .38em/1.4 var(--display);color:var(--muted);letter-spacing:.04em}
+header p{color:var(--muted);max-width:62ch;margin:0}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.controls{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);display:flex;flex-wrap:wrap;gap:8px;padding-block:14px;margin-top:24px;border-bottom:1px solid var(--line)}
+.controls input,.controls select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:0;padding:8px 10px}
+.controls input{flex:1 1 180px;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.chip-btn{font:500 13px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:0;padding:5px 12px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;font-size:11.5px}
+.chip-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.count{font:500 12px var(--mono);color:var(--muted);margin:14px 0 4px}
+ol{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:72px 1fr;gap:16px;padding-block:18px;border-bottom:1px solid var(--line)}
+.dial{position:relative;width:64px;height:64px}
+.dial svg{width:64px;height:64px;transform:rotate(-90deg)}
+.dial .val{position:absolute;inset:0;display:grid;place-items:center;font:600 20px var(--display);font-variant-numeric:tabular-nums}
+.rank{font:700 18px/1 var(--gothic);color:var(--muted);text-align:center;margin-top:6px}
+.row.top .rank{color:var(--gold)}
+.row.top h2{color:var(--gold)}
+.info{min-width:0}
+.info h2{font:600 1.6rem/1.1 var(--display);margin:0;letter-spacing:.01em}
+.meta{color:var(--muted);font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;margin:4px 0 8px}
+.note{margin:0 0 10px;max-width:62ch}
+.ev{display:flex;flex-wrap:wrap;gap:6px}
+.ev a{font-size:12px;text-decoration:none;border-radius:0;padding:3px 8px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--line);display:inline-flex;gap:6px;align-items:baseline}
+.ev a.award{background:var(--gold-soft);color:var(--gold);border-color:#4a3b22;font-weight:600}
+.ev a b{font:500 11px var(--mono)}
+.ev a:hover{text-decoration:underline}
+section.method{margin-top:40px;padding:20px;background:var(--surface);border:1px solid var(--line);outline:1px solid var(--line);outline-offset:4px;border-radius:0}
+section.method h3{font:700 1.6rem var(--gothic);margin:0 0 8px}
+.wtable{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+.wtable td{padding:6px 0;border-top:1px solid var(--line);vertical-align:top}
+.wtable td:last-child{text-align:right;font:500 13px var(--mono);white-space:nowrap;padding-left:12px}
+.method p{color:var(--muted);font-size:13.5px;max-width:68ch}
+.empty{padding:24px 0;color:var(--muted)}
+@media (max-width:480px){.row{grid-template-columns:56px 1fr;gap:12px}.dial,.dial svg{width:52px;height:52px}.dial .val{font-size:14px}}
+@media (prefers-reduced-motion:no-preference){.dial circle.arc{transition:stroke-dashoffset .5s ease}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Melbourne · October 2026</div>
+  <h1>The Coffee Ledger<span>of Melbourne, kept in black</span></h1>
+  <p>Melbourne's most-awarded coffee spots, scored out of 10 from The Age Good Food Guide, the World's 100 Best Coffee Shops list, barista competition titles and the city's major food guides. Each score shows exactly which listings earned it.</p>
+</header>
+
+<div class="controls" role="search">
+  <input id="q" type="search" placeholder="Search cafe or suburb" aria-label="Search cafe or suburb">
+  <select id="sort" aria-label="Sort">
+    <option value="score">Highest score</option>
+    <option value="name">A to Z</option>
+  </select>
+  <div class="chips" id="areas" aria-label="Filter by area"></div>
+</div>
+
+<p class="count" id="count"></p>
+<ol id="list"></ol>
+
+<section class="method" id="method">
+  <h3>How the score works</h3>
+  <p>Each listing adds points. The raw total is scaled so 8 points equals 10/10, capped at 10. Awards from judged panels weigh more than editorial roundups.</p>
+  <table class="wtable" id="weights"></table>
+  <p>Good Food Guide cafe awards are judged on the whole cafe (food, service, room), not coffee alone. Only Coffee Project's world ranking belongs to its Sydney flagship, so its Melbourne Quarter outpost gets a reduced affiliate credit. Scores reflect published recognition, not our own tasting.</p>
+</section>
+</div>
+
+<script>
+const SRC = {
+  gfg26:{label:"Good Food Guide 2026 · Cafe of the Year",pts:3,award:true,url:"https://www.melbournefoodandwine.com.au/?p=15150"},
+  gfg25:{label:"Good Food Guide 2025 · Cafe of the Year",pts:2,award:true,url:"https://nineforbrands.com.au/?p=44396"},
+  gfg24:{label:"Good Food Guide · Best cafe 2024",pts:2,award:true,url:"https://canberratimes.com.au/story/8530646/20-best-cafes-in-melbourne-you-need-to-visit"},
+  w100top:{label:"World's 100 Best 2026",pts:3,award:true,url:"https://www.timeout.com/melbourne/news/these-two-melbourne-cafes-cracked-the-worlds-100-best-coffee-shops-list-for-2026-021826"},
+  w100:{label:"World's 100 Best 2026",pts:2,award:true,url:"https://www.timeout.com/melbourne/news/these-two-melbourne-cafes-cracked-the-worlds-100-best-coffee-shops-list-for-2026-021826"},
+  w100_25:{label:"World's 100 Best 2025",pts:1,award:true,url:"https://secretmelbourne.com/worlds-100-best-coffee-shops/"},
+  w100aff:{label:"Sydney flagship #4 in World's 100 Best 2026",pts:1,award:true,url:"https://www.timeout.com/sydney/news/four-sydney-cafes-have-cracked-a-list-of-the-worlds-100-best-coffee-shops-for-2026-021726"},
+  champ:{label:"Barista championship title",pts:1,award:true,url:"https://sitchu.com.au/melbourne/cafes/best-coffee-melbourne"},
+  mice:{label:"MICE Australia's Favourite Coffee 2026",pts:1,award:true,url:"https://sitchu.com.au/melbourne/cafes/best-coffee-melbourne"},
+  sitchuTop:{label:"Sitchu Best Coffee 2026 · lead pick",pts:2,url:"https://sitchu.com.au/melbourne/cafes/best-coffee-melbourne"},
+  sitchu:{label:"Sitchu Best Coffee 2026",pts:1,url:"https://sitchu.com.au/melbourne/cafes/best-coffee-melbourne"},
+  timeout:{label:"Time Out CBD coffee",pts:0.5,url:"https://www.timeout.com/melbourne/restaurants/the-best-coffee-in-the-melbourne-cbd"},
+  ausCom:{label:"Australia.com top 10",pts:0.5,url:"https://www.australia.com/en/places/melbourne-and-surrounds/best-coffee-shops.html"},
+  mom:{label:"Man of Many",pts:0.5,url:"https://manofmany.com/lifestyle/drinks/best-coffee-melbourne"},
+  wlm:{label:"World Loves Melbourne 2026",pts:0.5,url:"https://www.theworldlovesmelbourne.com/food-wine/best-cafes.html"},
+  roadbook:{label:"Roadbook",pts:0.5,url:"https://roadbook.com/melbourne/city-guide/best-melbourne-coffee-cafes/"}
+};
+
+const CAFES = [
+  {n:"Proud Mary",s:"Collingwood",a:"North",note:"Direct-sourced, roasted in Melbourne since 2009. Melbourne's highest-ranked entry on the 2026 world list (#27, after #4 in 2025).",e:["w100top","w100_25","sitchuTop","wlm","mom"]},
+  {n:"Vacation Coffee",s:"CBD, Richmond & Cremorne",a:"CBD",note:"Pink-cup roaster with natural-process microlots. On the world list two years running (#71 in 2025, #100 in 2026).",e:["w100","w100_25","sitchu"]},
+  {n:"Veneziano Coffee Roasters",s:"Richmond",a:"East",note:"Roastery flagship with the Pinnacle reserve menu. Ranked #19 globally in 2025; its ambassador is 2026 Australian Barista Champion.",e:["w100_25","sitchu","champ"]},
+  {n:"Axil Coffee Roasters",s:"Hawthorn",a:"East",note:"Home of World Barista Champions Anthony Douglas (2022) and Jack Simpson (2025). Voted Australia's Favourite Coffee at MICE 2026.",e:["champ","mice","sitchu"]},
+  {n:"Commonfolk Coffee",s:"Frankston",a:"South-east",note:"The Age Good Food Guide's 2026 Cafe of the Year, the Guide's top cafe honour for Victoria.",e:["gfg26"]},
+  {n:"Seven Seeds",s:"Carlton",a:"North",note:"Third-wave pioneer warehouse pouring the Golden Gate blend and rotating single origins. #87 on the 2025 world list.",e:["w100_25","sitchuTop","ausCom"]},
+  {n:"ONA Coffee",s:"Brunswick",a:"North",note:"Founded by 2015 World Barista Champion Saša Šestić. Freezer menu of 20+ rare reserve coffees.",e:["sitchuTop","champ"]},
+  {n:"Patricia Coffee Brewers",s:"CBD",a:"CBD",note:"Standing-only Little Bourke St bar: black, white or filter. Sitchu's first CBD pick.",e:["sitchuTop","mom","roadbook"]},
+  {n:"Market Lane Coffee",s:"Multiple, roastery in Brunswick East",a:"CBD",note:"Independent roaster since 2009 that made traceability standard; filter is its strong suit.",e:["sitchuTop","timeout","mom"]},
+  {n:"Dukes Coffee Roasters",s:"Flinders Lane, CBD",a:"CBD",note:"Organic coffees from small farms and co-ops; the rotating single origin is the order.",e:["sitchu","ausCom","mom","roadbook"]},
+  {n:"ST. ALi",s:"South Melbourne",a:"South",note:"The 2005 Yarra Place warehouse where it began, pouring Orthodox and Wide Awake blends.",e:["sitchu","ausCom","mom","wlm"]},
+  {n:"Aunty Peg's",s:"Collingwood",a:"North",note:"Proud Mary's roastery cellar door: one-on-one barista service, rare microlots, free Saturday cuppings.",e:["sitchuTop"]},
+  {n:"Moon Mart",s:"South Melbourne",a:"South",note:"Korean-run cafe named the Good Food Guide's 2025 Cafe of the Year.",e:["gfg25"]},
+  {n:"Chiaki",s:"Collingwood",a:"North",note:"Japanese-inspired cafe serious about its coffee; named the Good Food Guide's best Melbourne cafe in 2024.",e:["gfg24"]},
+  {n:"Calēre",s:"Fitzroy",a:"North",note:"Tiny Gertrude St bar devoted to single origins from guest roasters. #28 on the 2025 world list.",e:["w100_25","sitchu"]},
+  {n:"Only Coffee Project",s:"Melbourne Quarter, Docklands",a:"CBD",note:"Melbourne outpost of Oceania's best coffee shop for 2026. Market Lane for milk; rare roasts for black.",e:["w100aff","sitchu"]},
+  {n:"Acoffee",s:"Collingwood & CBD",a:"North",note:"Run by former Australian Cup Tasting Champion Byoung-Woo Kang; order espresso and filter side by side.",e:["sitchu","champ"]},
+  {n:"Tone Coffee",s:"Prahran & North Melbourne",a:"South",note:"Home of the Tiger Bomb, from 2015 World Latte Art Champion Caleb Cha.",e:["sitchu","champ"]},
+  {n:"Industry Beans",s:"Fitzroy",a:"North",note:"Largest roastery sits beside the Westgarth St cafe; espresso, filter and the cult Bubble Coffee.",e:["sitchu","ausCom","mom"]},
+  {n:"Brother Baba Budan",s:"CBD",a:"CBD",note:"Seven Seeds' Little Bourke St original from 2003, chairs still hanging from the ceiling.",e:["sitchu","roadbook"]},
+  {n:"Disciple Roasters",s:"Brunswick",a:"North",note:"Black coffee only: 15 rotating single origins, from $5 cups to $100+ rarities. BYO cup for takeaway.",e:["sitchu"]},
+  {n:"Little Rogue",s:"Drewery Lane, CBD",a:"CBD",note:"Blue-door laneway bar pouring Small Batch's Candyman.",e:["sitchu"]},
+  {n:"Good Measure",s:"Carlton",a:"North",note:"Lygon St cafe-bar famous for the Mont Blanc filter-and-cream coffee.",e:["sitchu"]}
+];
+
+const MAX = 8;
+const scoreOf = c => Math.min(10, c.e.reduce((t,k)=>t+SRC[k].pts,0)/MAX*10);
+CAFES.forEach(c=>c.score=Math.round(scoreOf(c)*10)/10);
+const ranked=[...CAFES].sort((a,b)=>b.score-a.score||a.n.localeCompare(b.n));
+ranked.forEach((c,i)=>c.rank=i+1);
+
+const areas=["All",...new Set(CAFES.map(c=>c.a))];
+let area="All";
+try{const saved=localStorage.getItem("mcl-area");if(saved&&areas.includes(saved))area=saved}catch(e){}
+const areasEl=document.getElementById("areas");
+areas.forEach(a=>{const b=document.createElement("button");b.className="chip-btn";b.type="button";b.textContent=a;b.setAttribute("aria-pressed",a===area);b.onclick=()=>{area=a;try{localStorage.setItem("mcl-area",a)}catch(e){}[...areasEl.children].forEach(x=>x.setAttribute("aria-pressed",x.textContent===a));render()};areasEl.appendChild(b)});
+
+const esc=s=>s.replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function dial(score){const r=28,C=2*Math.PI*r,off=C*(1-score/10);
+  return `<div class="dial"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--line)" stroke-width="3"/><circle class="arc" cx="32" cy="32" r="${r}" fill="none" stroke="${score>=9?"var(--gold)":"var(--accent)"}" stroke-width="3" stroke-linecap="butt" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg><div class="val">${score.toFixed(1)}</div></div>`}
+
+function render(){
+  const q=document.getElementById("q").value.trim().toLowerCase();
+  const sort=document.getElementById("sort").value;
+  let rows=ranked.filter(c=>(area==="All"||c.a===area)&&(!q||(c.n+" "+c.s).toLowerCase().includes(q)));
+  if(sort==="name")rows=[...rows].sort((a,b)=>a.n.localeCompare(b.n));
+  document.getElementById("count").textContent=`${rows.length} of ${CAFES.length} cafes`;
+  document.getElementById("list").innerHTML=rows.length?rows.map(c=>`
+    <li class="row${c.rank===1?" top":""}">
+      <div>${dial(c.score)}<div class="rank">#${c.rank}</div></div>
+      <div class="info">
+        <h2>${esc(c.n)}</h2>
+        <div class="meta">${esc(c.s)}</div>
+        <p class="note">${esc(c.note)}</p>
+        <div class="ev">${c.e.map(k=>{const s=SRC[k];return `<a class="${s.award?"award":""}" href="${s.url}" target="_blank" rel="noopener">${esc(s.label)} <b>+${s.pts}</b></a>`}).join("")}</div>
+      </div>
+    </li>`).join(""):`<li class="empty">No cafes match that search. Clear the search box or pick another area.</li>`;
+}
+document.getElementById("q").addEventListener("input",render);
+document.getElementById("sort").addEventListener("change",render);
+
+const seen=new Set();
+document.getElementById("weights").innerHTML=Object.values(SRC).filter(s=>{const k=s.label.replace(/ · .*$/,"");if(seen.has(s.label))return false;seen.add(s.label);return true}).map(s=>`<tr><td>${esc(s.label)}</td><td>+${s.pts}</td></tr>`).join("");
+render();
+</script>
+
+</body>
+</html>
